@@ -7,7 +7,7 @@ import os
 import json
 import urllib.request
 # --- THÔNG TIN PHIÊN BẢN ---
-VERSION = "1.0.1"
+VERSION = "1.0.0"
 UPDATE_URL = "https://raw.githubusercontent.com/dovanphit1-creator/RanDoiKhang/refs/heads/main/version.json"
 
 # --- CẤU HÌNH HẰNG SỐ ---

@@ -12,7 +12,7 @@
             --green-led: #32ff32;
             --magenta-led: #ff32ff;
             --orange-led: #ffa500;
-            --card-bg: rgba(20, 24, 35, 0.9);
+            --card-bg: rgba(15, 18, 26, 0.95);
             --border-color: #23283c;
         }
         
@@ -26,80 +26,199 @@
             padding: 40px 20px;
             margin: 0;
             line-height: 1.6;
+            overflow-x: hidden;
         }
+
+        /* Hiệu ứng nền hạt Pixel bay lơ lửng */
+        .bg-animation {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #161b29 0%, #0a0c12 100%);
+            z-index: -1;
+        }
+        .pixel {
+            position: absolute;
+            width: 2px; height: 2px;
+            background: var(--blue-led);
+            opacity: 0.3;
+            animation: float 20s infinite linear;
+        }
+        @keyframes float {
+            from { transform: translateY(100vh) translateX(0); }
+            to { transform: translateY(-10vh) translateX(100px); }
+        }
+
         .container {
-            max-width: 800px;
+            max-width: 900px;
             width: 100%;
-            border: 2px solid #23283c;
-            padding: 30px;
-            background: rgba(20, 24, 35, 0.8);
-            box-shadow: 0 0 30px rgba(50, 150, 255, 0.1);
-            border-radius: 8px;
+            z-index: 1;
         }
-        h1 {
-            color: var(--blue-led);
+
+        header {
             text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            text-shadow: 0 0 15px var(--blue-led);
-            margin-bottom: 10px;
+            margin-bottom: 50px;
         }
-        .version { text-align: center; font-size: 0.9em; opacity: 0.6; margin-bottom: 30px; }
+
+        h1 {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            color: var(--blue-led);
+            text-transform: uppercase;
+            letter-spacing: 10px;
+            text-shadow: 3px 0 var(--magenta-led), -3px 0 var(--green-led);
+            margin-bottom: 10px;
+            font-weight: 900;
+            animation: glitch 3s infinite;
+        }
+
+        @keyframes glitch {
+            0% { text-shadow: 3px 0 var(--magenta-led), -3px 0 var(--green-led); }
+            5% { text-shadow: -3px 0 var(--magenta-led), 3px 0 var(--green-led); }
+            10% { text-shadow: 3px 0 var(--magenta-led), -3px 0 var(--green-led); }
+            100% { text-shadow: 3px 0 var(--magenta-led), -3px 0 var(--green-led); }
+        }
+
+        .version { 
+            font-size: 0.9em; 
+            opacity: 0.6; 
+            font-family: 'Consolas', monospace;
+            letter-spacing: 2px;
+        }
+
         .download-box { text-align: center; margin: 40px 0; }
+        
         .btn {
             display: inline-block;
-            padding: 15px 40px;
+            padding: 18px 50px;
             border: 2px solid var(--green-led);
             color: var(--green-led);
             text-decoration: none;
             font-weight: bold;
-            font-size: 1.2em;
+            font-size: 1.4em;
             transition: all 0.3s ease;
             border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: transparent;
+            box-shadow: 0 0 15px rgba(50, 255, 50, 0.2);
+            animation: pulse 2s infinite;
         }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 15px rgba(50, 255, 50, 0.2); }
+            50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(50, 255, 50, 0.4); }
+            100% { transform: scale(1); box-shadow: 0 0 15px rgba(50, 255, 50, 0.2); }
+        }
+
         .btn:hover {
             background: var(--green-led);
             color: var(--bg-color);
-            box-shadow: 0 0 20px var(--green-led);
-            transform: translateY(-2px);
+            animation: none;
+            transform: scale(1.1);
         }
-        .features { margin-top: 40px; }
-        .feature-list { list-style: none; padding: 0; }
-        .feature-list li { margin-bottom: 15px; padding-left: 25px; position: relative; }
-        .feature-list li::before { content: "▶"; position: absolute; left: 0; color: var(--magenta-led); }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 50px;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(50, 150, 255, 0.2);
+            padding: 30px;
+            border-radius: 12px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card:hover {
+            border-color: var(--blue-led);
+            transform: translateY(-5px);
+            background: rgba(50, 150, 255, 0.05);
+            box-shadow: 0 10px 30px rgba(50, 150, 255, 0.1);
+        }
+
+        .feature-card h3 {
+            margin-top: 0;
+            color: var(--magenta-led);
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+        }
+
         .highlight { color: var(--orange-led); font-weight: bold; }
         code { background: #1a1e2a; padding: 3px 8px; border-radius: 4px; color: var(--blue-led); }
-        .guide { background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 4px; margin-top: 30px; }
+        
+        .guide { 
+            background: rgba(255, 255, 255, 0.03); 
+            padding: 35px; 
+            border-radius: 12px; 
+            margin-top: 60px; 
+            border-left: 5px solid var(--orange-led);
+        }
+
+        footer {
+            margin-top: 80px;
+            padding-bottom: 40px;
+            font-size: 0.8em;
+            opacity: 0.4;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
+    <div class="bg-animation">
+        <!-- Tạo 10 hạt pixel ngẫu nhiên -->
+        <div class="pixel" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="pixel" style="left: 30%; animation-delay: 5s; background: var(--magenta-led);"></div>
+        <div class="pixel" style="left: 60%; animation-delay: 2s;"></div>
+        <div class="pixel" style="left: 80%; animation-delay: 8s; background: var(--green-led);"></div>
+    </div>
     <div class="container">
-        <h1>RẮN ĐỐI KHÁNG</h1>
-        <div class="version">Phiên bản hiện tại: v1.0.1</div>
+        <header>
+            <h1>RẮN ĐỐI KHÁNG</h1>
+            <div class="version">E-INK PRO EDITION V1.0.1</div>
+        </header>
         
-        <p>Chào mừng bạn đến với phiên bản Rắn Săn Mồi thế hệ mới. Không chỉ là ăn mồi, đây là cuộc chiến trí tuệ giữa bạn và <span class="highlight">AI Q-Learning</span> tiến hóa liên tục.</p>
+        <p style="text-align: center; font-size: 1.2em; max-width: 700px; margin: 0 auto;">
+            Trải nghiệm cuộc chiến trí tuệ đỉnh cao giữa bạn và <span class="highlight">AI Q-Learning</span> tiến hóa liên tục trong không gian LED cổ điển.
+        </p>
         
         <div class="download-box">
-            <!-- Đường dẫn này trỏ tới repo GitHub của bạn -->
-            <a href="https://github.com/dovanphit1-creator/RanDoiKhang/archive/refs/heads/main.zip" class="btn">TẢI GAME (.ZIP)</a>
+            <a href="https://github.com/dovanphit1-creator/RanDoiKhang/releases/download/v1.0.1/game.exe" class="btn">TẢI GAME (.EXE CHO WINDOWS)</a>
         </div>
 
-        <div class="features">
-            <h3>Tại sao bạn nên chơi?</h3>
-            <ul class="feature-list">
-                <li><span class="highlight">Đối thủ AI Thiên tài:</span> AI học hỏi từ sai lầm và trở nên khó bị đánh bại hơn sau mỗi trận đấu.</li>
-                <li><span class="highlight">Mồi biết chạy:</span> Các loại mồi đặc biệt (SF1, SF2, SF3) có bộ não riêng để né tránh kẻ săn mồi.</li>
-                <li><span class="highlight">Đồ họa LED & E-Ink:</span> Hiệu ứng ánh sáng rực rỡ trên nền giấy tối sâu, mang lại cảm giác retro nhưng cao cấp.</li>
-                <li><span class="highlight">Hệ thống Stats:</span> Theo dõi tỉ lệ Thắng/Thua và quá trình học tập của AI ngay tại Menu.</li>
-            </ul>
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>TRÍ TUỆ NHÂN TẠO</h3>
+                <p>Đối thủ AI không chỉ di chuyển ngẫu nhiên. Nó học hỏi từ mỗi bước đi của bạn để trở nên bất khả chiến bại.</p>
+            </div>
+            <div class="feature-card">
+                <h3>MỒI THÔNG MINH</h3>
+                <p>Mồi đặc biệt <span class="highlight">SF1, SF2, SF3</span> có khả năng tự nhận thức và né tránh kẻ săn mồi.</p>
+            </div>
+            <div class="feature-card">
+                <h3>ĐỒ HỌA LED RETRO</h3>
+                <p>Hiệu ứng ánh sáng Neon rực rỡ trên nền giấy E-Ink tối, tối ưu cho trải nghiệm tập trung cao độ.</p>
+            </div>
+            <div class="feature-card">
+                <h3>TIẾN HÓA VÔ HẠN</h3>
+                <p>Dữ liệu học tập được lưu lại sau mỗi trận đấu, khiến AI ngày càng thông minh hơn theo thời gian.</p>
+            </div>
         </div>
 
         <div class="guide">
-            <h3>Hướng dẫn nhanh:</h3>
-            1. Đảm bảo máy đã cài <span class="highlight">Python</span>.<br>
-            2. Cài đặt thư viện đồ họa: <code>pip install pygame</code><br>
-            3. Chạy file <code>game.py</code> và bắt đầu chinh phục!
+            <h3>Cách chơi:</h3>
+            <ol>
+                <li><strong>Dành cho người chơi:</strong> Tải file <code>.exe</code> ở trên và chạy ngay (không cần cài đặt gì thêm).</li>
+                <li><strong>Dành cho Dev:</strong> Cài Python, chạy <code>pip install pygame</code> và khởi động <code>game.py</code>.</li>
+            </ol>
         </div>
+
+        <footer>
+            &copy; 2024 RanDoiKhang Project. Developed for Software Engineers.
+        </footer>
     </div>
 </body>
 </html>

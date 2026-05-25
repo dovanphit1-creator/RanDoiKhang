@@ -94,6 +94,8 @@ def create_paper_texture():
     surf.blit(overlay, (0, 0))
     return surf
 
+PAPER_TEXTURE = create_paper_texture()
+
 # --- HỆ THỐNG AI PHÁT TRIỂN (Q-LEARNING) ---
 class SnakeAI:
     def __init__(self, filename="snake_ai.json"):
@@ -1015,10 +1017,10 @@ def gameLoop(start_color_idx):
             bg_flash = max(0, bg_flash - 0.02)
 
         # --- HỆ THỐNG DI CHUYỂN VÀ HỌC TẬP CỦA MỒI ĐẶC BIỆT ---
-        dirs_mồi = [(SNAKE_BLOCK, 0), (-SNAKE_BLOCK, 0), (0, SNAKE_BLOCK), (0, -SNAKE_BLOCK), (0, 0)]
+        food_directions = [(SNAKE_BLOCK, 0), (-SNAKE_BLOCK, 0), (0, SNAKE_BLOCK), (0, -SNAKE_BLOCK), (0, 0)]
         
         # Helper function for food movement and learning
-        def move_and_learn_food(f_type, active, fx, fy, last_action, prev_dist_p, prev_dist_ai, move_chance, min_age_to_learn, weight):
+        def move_and_learn_food(f_type, active, fx, fy, last_action, prev_dist_p, prev_dist_ai, move_chance, min_age_to_learn, weight, food_dirs):
             nonlocal x1, y1, ai_x, ai_y, snake_List, ai_snake_list
 
             if not active: return fx, fy, last_action, prev_dist_p, prev_dist_ai
@@ -1044,7 +1046,7 @@ def gameLoop(start_color_idx):
 
             new_fx, new_fy = fx, fy
             if action_to_take < 4:
-                dx, dy = dirs_mồi[action_to_take]
+                dx, dy = food_dirs[action_to_take]
                 temp_nx, temp_ny = fx + dx, fy + dy
                 
                 # Check for wall collision
@@ -1073,11 +1075,11 @@ def gameLoop(start_color_idx):
 
         # Apply movement and learning for each food type
         # SF1: Tăng động hơn một chút để người chơi dễ làm quen
-        sf1_x, sf1_y, sf1_last_action, sf1_prev_dist_p, sf1_prev_dist_ai = move_and_learn_food("sf1", sf1_active, sf1_x, sf1_y, sf1_last_action, sf1_prev_dist_p, sf1_prev_dist_ai, 10, 0, 5)
+        sf1_x, sf1_y, sf1_last_action, sf1_prev_dist_p, sf1_prev_dist_ai = move_and_learn_food("sf1", sf1_active, sf1_x, sf1_y, sf1_last_action, sf1_prev_dist_p, sf1_prev_dist_ai, 10, 0, 5, food_directions)
         # SF2: Di chuyển nhanh, học tập chuyên nghiệp hơn
-        sf2_x, sf2_y, sf2_last_action, sf2_prev_dist_p, sf2_prev_dist_ai = move_and_learn_food("sf2", sf2_active, sf2_x, sf2_y, sf2_last_action, sf2_prev_dist_p, sf2_prev_dist_ai, 5, 50, 100)
+        sf2_x, sf2_y, sf2_last_action, sf2_prev_dist_p, sf2_prev_dist_ai = move_and_learn_food("sf2", sf2_active, sf2_x, sf2_y, sf2_last_action, sf2_prev_dist_p, sf2_prev_dist_ai, 5, 50, 100, food_directions)
         # SF3: Di chuyển LIÊN TỤC, bộ não thiên tài (weight 2000), cực kỳ khó bắt
-        sf3_x, sf3_y, sf3_last_action, sf3_prev_dist_p, sf3_prev_dist_ai = move_and_learn_food("sf3", sf3_active, sf3_x, sf3_y, sf3_last_action, sf3_prev_dist_p, sf3_prev_dist_ai, 1, 150, 2000)
+        sf3_x, sf3_y, sf3_last_action, sf3_prev_dist_p, sf3_prev_dist_ai = move_and_learn_food("sf3", sf3_active, sf3_x, sf3_y, sf3_last_action, sf3_prev_dist_p, sf3_prev_dist_ai, 1, 150, 2000, food_directions)
         
         dis.blit(PAPER_TEXTURE, (0, 0))
 

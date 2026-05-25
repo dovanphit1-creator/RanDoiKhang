@@ -1,15 +1,105 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-    <title>RanDoiKhang</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rắn Đối Kháng - E-Ink Pro Edition</title>
+    <style>
+        :root {
+            --bg-color: #0a0c12; /* PAPER_BASE từ game.py */
+            --text-color: #dcdcf0; /* BLACK (off-white) từ game.py */
+            --blue-led: #3296ff;
+            --green-led: #32ff32;
+            --magenta-led: #ff32ff;
+            --orange-led: #ffa500;
+            --card-bg: rgba(20, 24, 35, 0.9);
+            --border-color: #23283c;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', 'Consolas', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            margin: 0;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            border: 2px solid #23283c;
+            padding: 30px;
+            background: rgba(20, 24, 35, 0.8);
+            box-shadow: 0 0 30px rgba(50, 150, 255, 0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            color: var(--blue-led);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 0 0 15px var(--blue-led);
+            margin-bottom: 10px;
+        }
+        .version { text-align: center; font-size: 0.9em; opacity: 0.6; margin-bottom: 30px; }
+        .download-box { text-align: center; margin: 40px 0; }
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            border: 2px solid var(--green-led);
+            color: var(--green-led);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2em;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+        }
+        .btn:hover {
+            background: var(--green-led);
+            color: var(--bg-color);
+            box-shadow: 0 0 20px var(--green-led);
+            transform: translateY(-2px);
+        }
+        .features { margin-top: 40px; }
+        .feature-list { list-style: none; padding: 0; }
+        .feature-list li { margin-bottom: 15px; padding-left: 25px; position: relative; }
+        .feature-list li::before { content: "▶"; position: absolute; left: 0; color: var(--magenta-led); }
+        .highlight { color: var(--orange-led); font-weight: bold; }
+        code { background: #1a1e2a; padding: 3px 8px; border-radius: 4px; color: var(--blue-led); }
+        .guide { background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 4px; margin-top: 30px; }
+    </style>
 </head>
 <body>
-    <h1>Chào mừng đến với RanDoiKhang!</h1>
-    <p>Game rắn săn mồi đối kháng với AI.</p>
-    <br>
-    <a href="https://github.com/dovanphit1-creator/RanDoiKhang/releases/latest" 
-       style="padding: 10px 20px; background-color: #2ea44f; color: white; text-decoration: none; border-radius: 5px;">
-       Tải phiên bản mới nhất tại đây
-    </a>
+    <div class="container">
+        <h1>RẮN ĐỐI KHÁNG</h1>
+        <div class="version">Phiên bản hiện tại: v1.0.1</div>
+        
+        <p>Chào mừng bạn đến với phiên bản Rắn Săn Mồi thế hệ mới. Không chỉ là ăn mồi, đây là cuộc chiến trí tuệ giữa bạn và <span class="highlight">AI Q-Learning</span> tiến hóa liên tục.</p>
+        
+        <div class="download-box">
+            <!-- Đường dẫn này trỏ tới repo GitHub của bạn -->
+            <a href="https://github.com/dovanphit1-creator/RanDoiKhang/archive/refs/heads/main.zip" class="btn">TẢI GAME (.ZIP)</a>
+        </div>
+
+        <div class="features">
+            <h3>Tại sao bạn nên chơi?</h3>
+            <ul class="feature-list">
+                <li><span class="highlight">Đối thủ AI Thiên tài:</span> AI học hỏi từ sai lầm và trở nên khó bị đánh bại hơn sau mỗi trận đấu.</li>
+                <li><span class="highlight">Mồi biết chạy:</span> Các loại mồi đặc biệt (SF1, SF2, SF3) có bộ não riêng để né tránh kẻ săn mồi.</li>
+                <li><span class="highlight">Đồ họa LED & E-Ink:</span> Hiệu ứng ánh sáng rực rỡ trên nền giấy tối sâu, mang lại cảm giác retro nhưng cao cấp.</li>
+                <li><span class="highlight">Hệ thống Stats:</span> Theo dõi tỉ lệ Thắng/Thua và quá trình học tập của AI ngay tại Menu.</li>
+            </ul>
+        </div>
+
+        <div class="guide">
+            <h3>Hướng dẫn nhanh:</h3>
+            1. Đảm bảo máy đã cài <span class="highlight">Python</span>.<br>
+            2. Cài đặt thư viện đồ họa: <code>pip install pygame</code><br>
+            3. Chạy file <code>game.py</code> và bắt đầu chinh phục!
+        </div>
+    </div>
 </body>
 </html>

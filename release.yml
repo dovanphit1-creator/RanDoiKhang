@@ -53,8 +53,11 @@ jobs:
         run: |
           rm -rf build
           python3 -m pygbag --build --no_speed_limit .
+          # Kiểm tra xem folder build có thực sự tồn tại index.html không
+          ls -R build/web
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@4.1.4
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
           folder: build/web
+          clean: true

@@ -1,0 +1,25 @@
+name: Build Windows EXE
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: |
+          pip install pygame PyInstaller
+      - name: Build EXE
+        run: |
+          pyinstaller --noconsole --onefile --add-data "eat.wav;." --add-data "hit.wav;." --add-data "win.wav;." --add-data "lose.wav;." --add-data "click.wav;." main.py
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: RanDoiKhang-Windows
+          path: dist/*.exe

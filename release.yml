@@ -1,0 +1,54 @@
+name: RanDoiKhang Multi-Platform Release
+on: [push]
+
+jobs:
+  # 1. Đóng gói cho Windows (.EXE)
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: pip install pygame PyInstaller
+      - name: Build EXE
+        run: pyinstaller --noconsole --onefile --add-data "eat.wav;." --add-data "hit.wav;." --add-data "win.wav;." --add-data "lose.wav;." --add-data "click.wav;." main.py
+      - name: Upload EXE
+        uses: actions/upload-artifact@v2
+        with:
+          name: RanDoiKhang-Windows-EXE
+          path: dist/*.exe
+
+  # 2. Đóng gói cho Android (.APK)
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build with Buildozer
+        uses: ArtemSerebriakov/buildozer-action@v1
+        with:
+          buildozer_version: master
+          python_version: 3.8
+      - name: Upload APK
+        uses: actions/upload-artifact@v2
+        with:
+          name: RanDoiKhang-Android-APK
+          path: bin/*.apk
+
+  # 3. Đóng gói bản Web (Chơi trên iPhone/Trình duyệt)
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Pygbag
+        run: pip install pygbag
+      - name: Build Web
+        run: python3 -m pygbag --build $GITHUB_WORKSPACE/main.py
+      - name: Deploy to GitHub Pages
+          # Tự động đẩy lên trang web chơi ngay
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          branch: gh-pages
+          folder: build/web

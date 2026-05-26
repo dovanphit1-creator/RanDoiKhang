@@ -1,0 +1,19 @@
+name: Build Web Version
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Pygbag
+        run: pip install pygbag
+      - name: Build Web Application
+        run: python3 -m pygbag --build $GITHUB_WORKSPACE/main.py
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          branch: gh-pages
+          folder: build/web

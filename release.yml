@@ -1,5 +1,7 @@
 name: RanDoiKhang Multi-Platform Release
-on: [push]
+on:
+  push:
+    branches: [ main ]
 
 permissions:
   contents: write
@@ -48,9 +50,10 @@ jobs:
       - name: Install Pygbag
         run: pip install pygbag
       - name: Build Web
-        run: python3 -m pygbag --build --no_speed_limit .
+        run: |
+          rm -rf build
+          python3 -m pygbag --build --no_speed_limit .
       - name: Deploy to GitHub Pages
-          # Tự động đẩy lên trang web chơi ngay
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           branch: gh-pages

@@ -8,7 +8,7 @@ import json
 
 # --- THÔNG TIN PHIÊN BẢN ---
 VERSION = "1.0.0"
-
+UPDATE_URL = "https://raw.githubusercontent.com/dovanphit1-creator/RanDoiKhang/refs/heads/main/version.json"
 # --- CẤU HÌNH HẰNG SỐ ---
 WIDTH, HEIGHT = 600, 400
 SNAKE_BLOCK = 10
@@ -30,6 +30,13 @@ SNAKE_COLORS = [BLUE_LED, (0, 255, 255), (200, 50, 255), (255, 150, 50), (255, 5
 PAPER_BASE = (10, 12, 18)    # Nền tối sâu (Deep Dark Blue)
 PAPER_GRAIN = (20, 24, 35)   # Hạt nhiễu tối
 GRID_LINE = (35, 40, 60)     # Đường lưới xanh thẫm
+
+# --- CẤU HÌNH ĐIỀU KHIỂN CẢM ỨNG ---
+TOUCH_UI_ALPHA = 100
+BTN_COLOR = (200, 200, 200, TOUCH_UI_ALPHA)
+BTN_SIZE = 50
+PAD_MARGIN = 20
+
 # --- CẤU HÌNH MỒI ĐẶC BIỆT ---
 SF1_RARITY = 150 # Xuất hiện thường xuyên hơn
 SF1_REWARD = 50
@@ -275,6 +282,27 @@ font_style = pygame.font.SysFont("Consolas", 22, bold=True)
 score_font = pygame.font.SysFont("Consolas", 20)
 result_font = pygame.font.SysFont("Consolas", 32, bold=True)
 
+def get_touch_rects():
+    """Lấy vùng va chạm của các nút điều khiển"""
+    # D-pad bên trái
+    up_rect = pygame.Rect(PAD_MARGIN + BTN_SIZE, HEIGHT - PAD_MARGIN - BTN_SIZE * 3, BTN_SIZE, BTN_SIZE)
+    down_rect = pygame.Rect(PAD_MARGIN + BTN_SIZE, HEIGHT - PAD_MARGIN - BTN_SIZE, BTN_SIZE, BTN_SIZE)
+    left_rect = pygame.Rect(PAD_MARGIN, HEIGHT - PAD_MARGIN - BTN_SIZE * 2, BTN_SIZE, BTN_SIZE)
+    right_rect = pygame.Rect(PAD_MARGIN + BTN_SIZE * 2, HEIGHT - PAD_MARGIN - BTN_SIZE * 2, BTN_SIZE, BTN_SIZE)
+    # Nút Boost bên phải
+    boost_rect = pygame.Rect(WIDTH - PAD_MARGIN - BTN_SIZE * 1.5, HEIGHT - PAD_MARGIN - BTN_SIZE * 1.5, BTN_SIZE * 1.5, BTN_SIZE * 1.5)
+    return up_rect, down_rect, left_rect, right_rect, boost_rect
+
+def draw_touch_controls(surface):
+    """Vẽ các nút điều khiển ảo lên màn hình"""
+    rects = get_touch_rects()
+    labels = ["▲", "▼", "◄", "►", "⚡"]
+    for rect, label in zip(rects, labels):
+        s = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
+        pygame.draw.rect(s, BTN_COLOR, s.get_rect(), border_radius=10)
+        draw_text_prominent(s, label, score_font, WHITE, (rect.width//2, rect.height//2))
+        surface.blit(s, (rect.x, rect.y))
+
 def draw_aura(surface, color, pos_rect, spread=15):
     aura_surf = pygame.Surface((pos_rect.width + spread*2, pos_rect.height + spread*2), pygame.SRCALPHA)
     for i in range(spread, 0, -1):
@@ -389,7 +417,8 @@ def main_menu(initial_color_idx=0):
                 update_menu_dims(event.w, event.h)
                 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_q:
+                # Hỗ trợ phím Q hoặc nút Back trên Android
+                if event.key == pygame.K_q or event.key == getattr(pygame, 'K_AC_BACK', -1):
                     if sfx_click: sfx_click.play()
                     return False
                 if event.key == pygame.K_s:
@@ -598,10 +627,22 @@ def gameLoop(start_color_idx):
         if paused:
             p_start = pygame.time.get_ticks()
             is_boosting = False
+            ai_is_boosting = False
             if sfx_click: sfx_click.play()
             while paused:
                 res_rect = pygame.Rect(WIDTH // 2 - 100, HEIGHT // 2 + 10, 200, 40)
                 dis.blit(PAPER_TEXTURE, (0, 0))
+                
+                for p_event in pygame.event.get():
+                    if p_event.type == pygame.QUIT:
+                        pygame.quit(); sys.exit()
+                    if p_event.type == pygame.KEYDOWN:
+                        if p_event.key in [pygame.K_p, pygame.K_ESCAPE] or p_event.key == getattr(pygame, 'K_AC_BACK', -1):
+                            paused = False
+                    if p_event.type == pygame.MOUSEBUTTONDOWN:
+                        # Bất kỳ cú chạm nào ngoài nút menu cũng có thể dùng để resume
+                        paused = False
+
                 draw_grid()
                 
                 # Vẽ các thực thể phía dưới lớp phủ tạm dừng để người chơi vẫn quan sát được
@@ -615,15 +656,7 @@ def gameLoop(start_color_idx):
                 
                 draw_stats(Length_of_snake - 1, ai_length - 1, time_left, False)
                 pygame.display.update()
-                for p_event in pygame.event.get():
-                    if p_event.type == pygame.QUIT:
-                        pygame.quit(); sys.exit()
-                    if p_event.type == pygame.KEYDOWN:
-                        if p_event.key in [pygame.K_p, pygame.K_ESCAPE]:
-                            paused = False
-                    if p_event.type == pygame.MOUSEBUTTONDOWN:
-                        if res_rect.collidepoint(p_event.pos):
-                            paused = False
+
             start_ticks += (pygame.time.get_ticks() - p_start) # Bù trừ thời gian đã tạm dừng
             if sfx_click: sfx_click.play()
             paused = False
@@ -842,7 +875,7 @@ def gameLoop(start_color_idx):
                 sync_entities_to_window()
 
             if event.type == pygame.KEYDOWN:
-                if event.key in [pygame.K_p, pygame.K_ESCAPE]:
+                if event.key in [pygame.K_p, pygame.K_ESCAPE] or event.key == getattr(pygame, 'K_AC_BACK', -1):
                     paused = True
                 if event.key == pygame.K_m:
                     if sfx_click: sfx_click.play()
@@ -858,6 +891,23 @@ def gameLoop(start_color_idx):
                 if home_btn.collidepoint(event.pos):
                     if sfx_click: sfx_click.play()
                     return False, snake_color_idx
+                
+                # Lấy các vùng nút bấm ảo
+                u, d, l, r, b = get_touch_rects()
+                # Kiểm tra va chạm với điểm chạm tay (event.pos)
+                if u.collidepoint(event.pos) and y1_change != SNAKE_BLOCK:
+                    y1_change, x1_change = -SNAKE_BLOCK, 0
+                elif d.collidepoint(event.pos) and y1_change != -SNAKE_BLOCK:
+                    y1_change, x1_change = SNAKE_BLOCK, 0
+                elif l.collidepoint(event.pos) and x1_change != SNAKE_BLOCK:
+                    x1_change, y1_change = -SNAKE_BLOCK, 0
+                elif r.collidepoint(event.pos) and x1_change != -SNAKE_BLOCK:
+                    x1_change, y1_change = SNAKE_BLOCK, 0
+                elif b.collidepoint(event.pos):
+                    is_boosting = True
+            if event.type == pygame.MOUSEBUTTONUP:
+                is_boosting = False
+
             if event.type == pygame.KEYDOWN and not is_stunned:
                 if event.key == pygame.K_LEFT and x1_change != SNAKE_BLOCK:
                     x1_change = -SNAKE_BLOCK
@@ -1123,6 +1173,10 @@ def gameLoop(start_color_idx):
         our_snake(SNAKE_BLOCK, snake_List, is_stunned, SNAKE_COLORS[snake_color_idx], flash_color, bg_flash, is_boosting)
         # Vẽ rắn AI với đầy đủ hiệu ứng Stun, Flash và Boosting
         our_snake(SNAKE_BLOCK, ai_snake_list, ai_is_stunned, MAGENTA_LED, ai_flash_color, ai_bg_flash, ai_is_boosting)
+
+        # Vẽ các nút điều khiển ảo lên trên cùng
+        if not game_close:
+            draw_touch_controls(dis)
 
         draw_stats(Length_of_snake - 1, ai_length - 1, time_left, is_boosting)
         pygame.display.update()

@@ -65,15 +65,12 @@ def get_path(filename, is_data=False):
     - is_data=False: Cho file âm thanh (Resources). Khi đóng gói EXE, nó nằm trong thư mục tạm.
     - is_data=True: Cho file .json (Dữ liệu). Nó phải nằm cạnh file EXE để không bị xóa.
     """
+    if not filename: return ""
     if hasattr(sys, '_MEIPASS'):
-        if is_data:
-            # File JSON sẽ được lưu ngay cạnh file .exe của bạn
-            return os.path.join(os.path.dirname(sys.executable), filename)
-        else:
-            # File âm thanh được lấy từ thư mục tạm khi đóng gói --add-data
-            return os.path.join(sys._MEIPASS, filename)
-    # Trường hợp chạy file .py bình thường
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
+        if is_data: return os.path.join(os.path.dirname(sys.executable), filename)
+        return os.path.join(sys._MEIPASS, filename)
+    # Trên Web hoặc chạy script thường, dùng đường dẫn tương đối là an toàn nhất
+    return filename
 
 def load_sfx(file_name):
     """Tải âm thanh và thông báo lỗi cụ thể ra console nếu thất bại"""

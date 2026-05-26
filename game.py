@@ -5,6 +5,7 @@ import sys
 import math
 import os
 import json
+import asyncio
 
 # --- THÔNG TIN PHIÊN BẢN ---
 VERSION = "1.0.0"
@@ -64,15 +65,12 @@ def get_path(filename, is_data=False):
     - is_data=False: Cho file âm thanh (Resources). Khi đóng gói EXE, nó nằm trong thư mục tạm.
     - is_data=True: Cho file .json (Dữ liệu). Nó phải nằm cạnh file EXE để không bị xóa.
     """
+    if not filename: return ""
     if hasattr(sys, '_MEIPASS'):
-        if is_data:
-            # File JSON sẽ được lưu ngay cạnh file .exe của bạn
-            return os.path.join(os.path.dirname(sys.executable), filename)
-        else:
-            # File âm thanh được lấy từ thư mục tạm khi đóng gói --add-data
-            return os.path.join(sys._MEIPASS, filename)
-    # Trường hợp chạy file .py bình thường
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
+        if is_data: return os.path.join(os.path.dirname(sys.executable), filename)
+        return os.path.join(sys._MEIPASS, filename)
+    # Sử dụng đường dẫn tương đối cho Web và phát triển cục bộ
+    return filename
 
 def load_sfx(file_name):
     """Tải âm thanh và thông báo lỗi cụ thể ra console nếu thất bại"""
@@ -390,7 +388,7 @@ def our_snake(snake_block, snake_list, is_stunned=False, snake_color=BLUE_LED, f
                 dis.blit(glow_surf, (center_x - (radius + glow_spread), center_y - (radius + glow_spread)))
             pygame.draw.circle(dis, body_color, (center_x, center_y), radius)
 
-def main_menu(initial_color_idx=0):
+async def main_menu(initial_color_idx=0):
     global WIDTH, HEIGHT, PAPER_TEXTURE, dis
     selected_color_idx = initial_color_idx
 
@@ -498,8 +496,9 @@ def main_menu(initial_color_idx=0):
         for i in range(5):
             pygame.draw.circle(dis, SNAKE_COLORS[selected_color_idx], (int(WIDTH / 2 - 40 + i * 20), int(HEIGHT / 2 + 175)), 8)
         pygame.display.update()
+        await asyncio.sleep(0)
 
-def gameLoop(start_color_idx):
+async def gameLoop(start_color_idx):
     global WIDTH, HEIGHT, PAPER_TEXTURE, dis
     game_close = False
     start_ticks = pygame.time.get_ticks()
@@ -656,6 +655,7 @@ def gameLoop(start_color_idx):
                 
                 draw_stats(Length_of_snake - 1, ai_length - 1, time_left, False)
                 pygame.display.update()
+                await asyncio.sleep(0)
 
             start_ticks += (pygame.time.get_ticks() - p_start) # Bù trừ thời gian đã tạm dừng
             if sfx_click: sfx_click.play()
@@ -684,6 +684,7 @@ def gameLoop(start_color_idx):
             dis.blit(menu_txt, menu_txt.get_rect(center=menu_btn.center))
             draw_stats(Length_of_snake - 1, ai_length - 1, time_left, is_boosting)
             pygame.display.update()
+            await asyncio.sleep(0)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -1185,17 +1186,18 @@ def gameLoop(start_color_idx):
         if is_boosting or ai_is_boosting: # Tốc độ game tăng lên nếu bạn HOẶC AI tăng tốc
             current_speed *= BOOST_SPEED_MULTIPLIER
         clock.tick(current_speed)
+        await asyncio.sleep(0)
 
-def main():
+async def main():
     current_color = 0
     
     while True:
-        res = main_menu(current_color)
+        res = await main_menu(current_color)
         if res is not False:
             playing = True
             current_color = res
             while playing:
-                playing, current_color = gameLoop(current_color)
+                playing, current_color = await gameLoop(current_color)
                 # Lưu dữ liệu ngay khi kết thúc một ván đấu
                 ai_agent.save_data()
                 food_agent.save_data()
@@ -1206,4 +1208,4 @@ def main():
     sys.exit()
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

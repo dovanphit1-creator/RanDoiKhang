@@ -1,6 +1,9 @@
 name: RanDoiKhang Multi-Platform Release
 on: [push]
 
+permissions:
+  contents: write
+
 jobs:
   # 1. Đóng gói cho Windows (.EXE)
   build-windows:
@@ -45,7 +48,7 @@ jobs:
       - name: Install Pygbag
         run: pip install pygbag
       - name: Build Web
-        run: python3 -m pygbag --build $GITHUB_WORKSPACE/main.py
+        run: python3 -m pygbag --build --no_speed_limit .
       - name: Deploy to GitHub Pages
           # Tự động đẩy lên trang web chơi ngay
         uses: JamesIves/github-pages-deploy-action@4.1.4

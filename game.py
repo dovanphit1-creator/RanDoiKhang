@@ -5,10 +5,9 @@ import sys
 import math
 import os
 import json
-import urllib.request
+
 # --- THÔNG TIN PHIÊN BẢN ---
-VERSION = "1.0.1"
-UPDATE_URL = "https://raw.githubusercontent.com/dovanphit1-creator/RanDoiKhang/refs/heads/main/version.json"
+VERSION = "1.0.0"
 
 # --- CẤU HÌNH HẰNG SỐ ---
 WIDTH, HEIGHT = 600, 400
@@ -52,9 +51,25 @@ try:
 except Exception as e:
     print(f"Hệ thống âm thanh không khởi tạo được: {e}")
 
+def get_path(filename, is_data=False):
+    """
+    Xử lý đường dẫn linh hoạt để không bị mất file khi đóng gói hoặc di chuyển:
+    - is_data=False: Cho file âm thanh (Resources). Khi đóng gói EXE, nó nằm trong thư mục tạm.
+    - is_data=True: Cho file .json (Dữ liệu). Nó phải nằm cạnh file EXE để không bị xóa.
+    """
+    if hasattr(sys, '_MEIPASS'):
+        if is_data:
+            # File JSON sẽ được lưu ngay cạnh file .exe của bạn
+            return os.path.join(os.path.dirname(sys.executable), filename)
+        else:
+            # File âm thanh được lấy từ thư mục tạm khi đóng gói --add-data
+            return os.path.join(sys._MEIPASS, filename)
+    # Trường hợp chạy file .py bình thường
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
+
 def load_sfx(file_name):
     """Tải âm thanh và thông báo lỗi cụ thể ra console nếu thất bại"""
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), file_name)
+    path = get_path(file_name, is_data=False)
     if not os.path.exists(path):
         print(f"CẢNH BÁO: Thiếu file âm thanh: {path}")
         return None
@@ -94,12 +109,10 @@ def create_paper_texture():
     surf.blit(overlay, (0, 0))
     return surf
 
-PAPER_TEXTURE = create_paper_texture()
-
 # --- HỆ THỐNG AI PHÁT TRIỂN (Q-LEARNING) ---
 class SnakeAI:
     def __init__(self, filename="snake_ai.json"):
-        self.filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
+        self.filename = get_path(filename, is_data=True)
         self.q_table = {}
         self.lr = 0.95  # Tốc độ học tối đa (gần như ghi nhớ tức thì)
         self.discount = 0.9
@@ -176,7 +189,7 @@ ai_agent = SnakeAI()
 # --- HỆ THỐNG BỘ NÃO MỒI ĐẶC BIỆT ---
 class FoodAI:
     def __init__(self, filename="food_ai.json"):
-        self.filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
+        self.filename = get_path(filename, is_data=True)
         self.q_table = {"sf1": {}, "sf2": {}, "sf3": {}}
         self.lr = 0.95 # Mồi cũng học với tốc độ bàn thờ
         self.discount = 0.9 # Nhìn xa trông rộng hơn để né tránh
@@ -232,7 +245,7 @@ food_agent = FoodAI()
 # --- HỆ THỐNG THỐNG KÊ ---
 class GameStats:
     def __init__(self, filename="game_stats.json"):
-        self.filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
+        self.filename = get_path(filename, is_data=True)
         self.stats = {"wins": 0, "losses": 0, "draws": 0, "total": 0}
         self.load_stats()
 
@@ -349,22 +362,9 @@ def our_snake(snake_block, snake_list, is_stunned=False, snake_color=BLUE_LED, f
                 dis.blit(glow_surf, (center_x - (radius + glow_spread), center_y - (radius + glow_spread)))
             pygame.draw.circle(dis, body_color, (center_x, center_y), radius)
 
-def check_for_update():
-    """Kiểm tra phiên bản mới từ GitHub"""
-    try:
-        with urllib.request.urlopen(UPDATE_URL, timeout=3) as response:
-            data = json.loads(response.read().decode())
-            remote_version = data.get("version", VERSION)
-            return remote_version > VERSION, remote_version
-    except:
-        return False, VERSION
-
-def main_menu(initial_color_idx=0, update_available=False, new_v=""):
+def main_menu(initial_color_idx=0):
     global WIDTH, HEIGHT, PAPER_TEXTURE, dis
     selected_color_idx = initial_color_idx
-
-    # Chuỗi thông báo cập nhật
-    update_txt = f"CÓ BẢN MỚI: v{new_v}! Hãy tải lại trên GitHub." if update_available else ""
 
     def update_menu_dims(w, h):
         global WIDTH, HEIGHT, PAPER_TEXTURE, dis
@@ -417,9 +417,7 @@ def main_menu(initial_color_idx=0, update_available=False, new_v=""):
         draw_grid() # Hiệu ứng LED đa sắc độc lập cho Menu
 
         # Hiển thị phiên bản và thông báo cập nhật
-        draw_text_prominent(dis, f"Phiên bản: {VERSION}", score_font, (150, 150, 150), (WIDTH // 2, HEIGHT - 20))
-        if update_available:
-            draw_text_prominent(dis, update_txt, score_font, RED_LED, (WIDTH // 2, HEIGHT // 2 + 100))
+        draw_text_prominent(dis, f"Phiên bản: {VERSION}", score_font, BLACK, (WIDTH // 2, HEIGHT - 20))
 
         # Bảng thống kê trận đấu
         stats_box = pygame.Rect(20, 20, 160, 110)
@@ -1136,17 +1134,18 @@ def gameLoop(start_color_idx):
 
 def main():
     current_color = 0
-    # Kiểm tra cập nhật khi bắt đầu
-    has_update, new_v = check_for_update()
+    
     while True:
-        res = main_menu(current_color, has_update, new_v)
+        res = main_menu(current_color)
         if res is not False:
             playing = True
             current_color = res
             while playing:
-                ai_agent.save_data() # Lưu trí tuệ AI sau mỗi trận
-                food_agent.save_data() # Lưu trí tuệ mồi
                 playing, current_color = gameLoop(current_color)
+                # Lưu dữ liệu ngay khi kết thúc một ván đấu
+                ai_agent.save_data()
+                food_agent.save_data()
+                game_stats.save_stats()
         else:
             break
     pygame.quit()
